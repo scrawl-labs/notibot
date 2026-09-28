@@ -63,7 +63,10 @@ curl -s http://localhost:3000/api/events | jq .
 ## 백오피스 화면
 
 `npm run dev`(또는 `npm start`) 실행 후 브라우저에서 **http://localhost:3000/admin** 접속. 별도 프론트엔드
-서버 없이 같은 Express 프로세스가 EJS로 서버사이드 렌더링합니다.
+서버 없이 같은 Express 프로세스가 EJS로 서버사이드 렌더링합니다. 스타일은
+[Tailwind CSS](https://tailwindcss.com) + [daisyUI](https://daisyui.com)(`corporate` 테마)를
+빌드 타임에 `public/admin.css`로 컴파일해서 정적으로 서빙합니다 (런타임 CDN 의존 없음 — `npm run dev`/`build`가
+자동으로 `build:css`를 실행). 클래스를 바꾼 뒤 CSS가 반영되지 않으면 `npm run build:css`를 다시 실행하세요.
 
 - `/admin/events` — 이벤트 로그 (성공/실패/매칭없음 기록, 계정/상태 필터)
 - `/admin/rules` — 트리거 규칙 생성/활성화 토글/삭제

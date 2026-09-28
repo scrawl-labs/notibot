@@ -1,64 +1,66 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="corporate">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DM 템플릿 · notibot</title>
   <%- include('partials/styles') %>
 </head>
-<body>
+<body class="bg-base-200 min-h-screen">
   <%- include('partials/nav', { active: 'templates' }) %>
-  <main>
-    <h2>DM 템플릿</h2>
+  <main class="max-w-5xl mx-auto p-4 sm:p-6">
+    <h2 class="text-lg font-extrabold mb-4">DM 템플릿</h2>
     <%- include('partials/error') %>
 
-    <div class="card">
-      <form method="post" action="/admin/templates">
-        <div class="grid-form">
-          <label>
-            이름
-            <input type="text" name="name" required placeholder="예: cucumber" />
+    <div class="card bg-base-100 shadow-sm border border-base-300 mb-5">
+      <div class="card-body p-4 sm:p-6">
+        <form method="post" action="/admin/templates">
+          <label class="flex flex-col gap-1 form-control mb-3 max-w-xs">
+            <div class="label"><span class="label-text text-xs">이름</span></div>
+            <input type="text" name="name" required placeholder="cucumber" class="input input-bordered input-sm" />
           </label>
-        </div>
-        <label>
-          본문 (<code>{{username}}</code> 사용 가능)
-          <textarea name="body" required placeholder="안녕하세요 {{username}}님! 최저가 링크는 ... 입니다"></textarea>
-        </label>
-        <div style="margin-top: 10px;">
-          <button type="submit">템플릿 추가</button>
-        </div>
-      </form>
+          <label class="flex flex-col gap-1 form-control mb-3">
+            <div class="label"><span class="label-text text-xs">본문 (<code>{{username}}</code> 사용 가능)</span></div>
+            <textarea name="body" required placeholder="안녕하세요 {{username}}님! 최저가 링크는 ... 입니다" class="textarea textarea-bordered mono text-sm" rows="3"></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary btn-sm">템플릿 추가</button>
+        </form>
+      </div>
     </div>
 
-    <div class="card">
-      <% if (templates.length === 0) { %>
-        <div class="empty">등록된 템플릿이 없습니다.</div>
-      <% } else { %>
-        <table>
-          <thead>
-            <tr>
-              <th>이름</th>
-              <th>본문</th>
-              <th>생성일</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% templates.forEach(function(t) { %>
-              <tr>
-                <td><%= t.name %></td>
-                <td><%= t.body %></td>
-                <td class="muted mono"><%= t.createdAt.toISOString().slice(0, 10) %></td>
-                <td class="actions">
-                  <form class="inline-form" method="post" action="/admin/templates/<%= t.id %>/delete" onsubmit="return confirm('삭제할까요?');">
-                    <button type="submit" class="danger">삭제</button>
-                  </form>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      <% } %>
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+      <div class="card-body p-4 sm:p-6">
+        <% if (templates.length === 0) { %>
+          <div class="text-center text-base-content/50 py-10">등록된 템플릿이 없습니다.</div>
+        <% } else { %>
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>본문</th>
+                  <th>생성일</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% templates.forEach(function(t) { %>
+                  <tr>
+                    <td class="font-medium"><%= t.name %></td>
+                    <td class="max-w-md truncate mono text-xs"><%= t.body %></td>
+                    <td class="mono text-xs text-base-content/60"><%= t.createdAt.toISOString().slice(0, 10) %></td>
+                    <td>
+                      <form method="post" action="/admin/templates/<%= t.id %>/delete" onsubmit="return confirm('삭제할까요?');">
+                        <button type="submit" class="btn btn-ghost btn-xs text-error">삭제</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
     </div>
   </main>
 </body>
