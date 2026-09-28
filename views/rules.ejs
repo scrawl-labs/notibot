@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>트리거 규칙 · notibot</title>
+  <%- include('partials/styles') %>
+</head>
+<body>
+  <%- include('partials/nav', { active: 'rules' }) %>
+  <main>
+    <h2>트리거 규칙</h2>
+    <%- include('partials/error') %>
+
+    <div class="card">
+      <% if (accounts.length === 0 || templates.length === 0) { %>
+        <p class="muted">규칙을 만들려면 먼저 <a href="/admin/accounts">계정</a>과 <a href="/admin/templates">DM 템플릿</a>을 하나 이상 등록하세요.</p>
+      <% } else { %>
+        <form method="post" action="/admin/rules">
+          <div class="grid-form">
+            <label>
+              계정
+              <select name="accountId" required>
+                <% accounts.forEach(function(acc) { %>
+                  <option value="<%= acc.id %>"><%= acc.username || acc.igUserId %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              미디어 ID (비우면 계정 전체)
+              <input type="text" name="mediaId" placeholder="예: media-123 (선택)" />
+            </label>
+            <label>
+              키워드
+              <input type="text" name="keyword" required placeholder="예: 오이" />
+            </label>
+            <label>
+              매칭 방식
+              <select name="matchType">
+                <option value="CONTAINS">CONTAINS</option>
+                <option value="EXACT">EXACT</option>
+                <option value="REGEX">REGEX</option>
+              </select>
+            </label>
+            <label>
+              DM 템플릿
+              <select name="dmTemplateId" required>
+                <% templates.forEach(function(t) { %>
+                  <option value="<%= t.id %>"><%= t.name %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label>
+              우선순위
+              <input type="text" name="priority" value="0" />
+            </label>
+          </div>
+          <button type="submit">규칙 추가</button>
+        </form>
+      <% } %>
+    </div>
+
+    <div class="card">
+      <% if (rules.length === 0) { %>
+        <div class="empty">등록된 트리거 규칙이 없습니다.</div>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>계정</th>
+              <th>범위</th>
+              <th>키워드</th>
+              <th>방식</th>
+              <th>템플릿</th>
+              <th>우선순위</th>
+              <th>상태</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rules.forEach(function(r) { %>
+              <tr>
+                <td><%= r.account.username || r.account.igUserId %></td>
+                <td class="mono muted"><%= r.mediaId || '전체' %></td>
+                <td><%= r.keyword %></td>
+                <td class="muted"><%= r.matchType %></td>
+                <td><%= r.dmTemplate.name %></td>
+                <td class="muted"><%= r.priority %></td>
+                <td>
+                  <span class="badge <%= r.isActive ? 'badge-SENT' : 'badge-NO_MATCH' %>">
+                    <%= r.isActive ? '활성' : '비활성' %>
+                  </span>
+                </td>
+                <td class="actions">
+                  <form class="inline-form" method="post" action="/admin/rules/<%= r.id %>/toggle">
+                    <button type="submit" class="secondary"><%= r.isActive ? '비활성화' : '활성화' %></button>
+                  </form>
+                  <form class="inline-form" method="post" action="/admin/rules/<%= r.id %>/delete" onsubmit="return confirm('삭제할까요?');">
+                    <button type="submit" class="danger">삭제</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </main>
+</body>
+</html>

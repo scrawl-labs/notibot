@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>이벤트 로그 · notibot</title>
+  <%- include('partials/styles') %>
+</head>
+<body>
+  <%- include('partials/nav', { active: 'events' }) %>
+  <main>
+    <h2>이벤트 로그</h2>
+    <%- include('partials/error') %>
+
+    <div class="card">
+      <form class="filters" method="get" action="/admin/events">
+        <label>
+          계정
+          <select name="accountId">
+            <option value="">전체</option>
+            <% accounts.forEach(function(acc) { %>
+              <option value="<%= acc.id %>" <%= filters.accountId === acc.id ? 'selected' : '' %>>
+                <%= acc.username || acc.igUserId %>
+              </option>
+            <% }) %>
+          </select>
+        </label>
+        <label>
+          상태
+          <select name="dmStatus">
+            <option value="">전체</option>
+            <% ['SENT', 'FAILED', 'NO_MATCH', 'SKIPPED'].forEach(function(s) { %>
+              <option value="<%= s %>" <%= filters.dmStatus === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </label>
+        <button type="submit">필터 적용</button>
+        <a class="btn secondary" href="/admin/events" style="text-decoration:none; padding:6px 12px;">초기화</a>
+      </form>
+
+      <% if (events.length === 0) { %>
+        <div class="empty">아직 기록된 이벤트가 없습니다.</div>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>시간</th>
+              <th>계정</th>
+              <th>미디어</th>
+              <th>댓글</th>
+              <th>작성자</th>
+              <th>매칭 키워드</th>
+              <th>상태</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% events.forEach(function(e) { %>
+              <tr>
+                <td class="muted mono"><%= e.createdAt.toISOString().replace('T', ' ').slice(0, 19) %></td>
+                <td><%= e.account.username || e.account.igUserId %></td>
+                <td class="mono"><%= e.mediaId %></td>
+                <td><%= e.text %></td>
+                <td class="muted"><%= e.fromUsername || e.fromUserId || '-' %></td>
+                <td><%= e.matchedRule ? e.matchedRule.keyword : '-' %></td>
+                <td><span class="badge badge-<%= e.dmStatus %>"><%= e.dmStatus %></span></td>
+                <td class="muted"><%= e.errorMessage || '' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </main>
+</body>
+</html>

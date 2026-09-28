@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>계정 · notibot</title>
+  <%- include('partials/styles') %>
+</head>
+<body>
+  <%- include('partials/nav', { active: 'accounts' }) %>
+  <main>
+    <h2>인스타그램 계정</h2>
+    <%- include('partials/error') %>
+
+    <div class="card">
+      <form method="post" action="/admin/accounts">
+        <div class="grid-form">
+          <label>
+            Instagram User ID
+            <input type="text" name="igUserId" required placeholder="예: 179xxxxxxxxxxxx" />
+          </label>
+          <label>
+            이름 (표시용)
+            <input type="text" name="username" placeholder="예: my_shop" />
+          </label>
+          <label>
+            Page Access Token
+            <input type="text" name="pageAccessToken" required placeholder="Meta에서 발급받은 토큰" />
+          </label>
+        </div>
+        <button type="submit">계정 추가</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <% if (accounts.length === 0) { %>
+        <div class="empty">등록된 계정이 없습니다.</div>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>IG User ID</th>
+              <th>이름</th>
+              <th>등록일</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% accounts.forEach(function(acc) { %>
+              <tr>
+                <td class="mono"><%= acc.igUserId %></td>
+                <td><%= acc.username || '-' %></td>
+                <td class="muted mono"><%= acc.createdAt.toISOString().slice(0, 10) %></td>
+                <td class="actions">
+                  <form class="inline-form" method="post" action="/admin/accounts/<%= acc.id %>/delete" onsubmit="return confirm('삭제할까요? 연결된 트리거 규칙도 함께 삭제됩니다.');">
+                    <button type="submit" class="danger">삭제</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </main>
+</body>
+</html>

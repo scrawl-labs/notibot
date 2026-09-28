@@ -1,9 +1,11 @@
+import path from "node:path";
 import express, { type Request } from "express";
 import { webhookRouter } from "./webhook/handler.js";
 import { accountsRouter } from "./routes/accounts.js";
 import { dmTemplatesRouter } from "./routes/dmTemplates.js";
 import { triggerRulesRouter } from "./routes/triggerRules.js";
 import { eventsRouter } from "./routes/events.js";
+import { adminRouter } from "./routes/admin.js";
 
 interface RequestWithRawBody extends Request {
   rawBody?: Buffer;
@@ -12,6 +14,9 @@ interface RequestWithRawBody extends Request {
 export function createApp() {
   const app = express();
 
+  app.set("view engine", "ejs");
+  app.set("views", path.join(process.cwd(), "views"));
+
   app.use(
     express.json({
       verify: (req, _res, buf) => {
@@ -19,6 +24,7 @@ export function createApp() {
       },
     }),
   );
+  app.use(express.urlencoded({ extended: true }));
 
   app.get("/healthz", (_req, res) => res.json({ ok: true }));
 
@@ -27,6 +33,7 @@ export function createApp() {
   app.use("/api/dm-templates", dmTemplatesRouter);
   app.use("/api/trigger-rules", triggerRulesRouter);
   app.use("/api/events", eventsRouter);
+  app.use("/admin", adminRouter);
 
   return app;
 }

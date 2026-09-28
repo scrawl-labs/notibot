@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DM 템플릿 · notibot</title>
+  <%- include('partials/styles') %>
+</head>
+<body>
+  <%- include('partials/nav', { active: 'templates' }) %>
+  <main>
+    <h2>DM 템플릿</h2>
+    <%- include('partials/error') %>
+
+    <div class="card">
+      <form method="post" action="/admin/templates">
+        <div class="grid-form">
+          <label>
+            이름
+            <input type="text" name="name" required placeholder="예: cucumber" />
+          </label>
+        </div>
+        <label>
+          본문 (<code>{{username}}</code> 사용 가능)
+          <textarea name="body" required placeholder="안녕하세요 {{username}}님! 최저가 링크는 ... 입니다"></textarea>
+        </label>
+        <div style="margin-top: 10px;">
+          <button type="submit">템플릿 추가</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <% if (templates.length === 0) { %>
+        <div class="empty">등록된 템플릿이 없습니다.</div>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>이름</th>
+              <th>본문</th>
+              <th>생성일</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% templates.forEach(function(t) { %>
+              <tr>
+                <td><%= t.name %></td>
+                <td><%= t.body %></td>
+                <td class="muted mono"><%= t.createdAt.toISOString().slice(0, 10) %></td>
+                <td class="actions">
+                  <form class="inline-form" method="post" action="/admin/templates/<%= t.id %>/delete" onsubmit="return confirm('삭제할까요?');">
+                    <button type="submit" class="danger">삭제</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </main>
+</body>
+</html>

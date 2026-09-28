@@ -60,6 +60,16 @@ curl -s http://localhost:3000/api/events | jq .
 
 실제 계정으로 DM까지 성공시키려면 `/api/accounts` 생성 시 진짜 `pageAccessToken`을 넣어야 합니다.
 
+## 백오피스 화면
+
+`npm run dev`(또는 `npm start`) 실행 후 브라우저에서 **http://localhost:3000/admin** 접속. 별도 프론트엔드
+서버 없이 같은 Express 프로세스가 EJS로 서버사이드 렌더링합니다.
+
+- `/admin/events` — 이벤트 로그 (성공/실패/매칭없음 기록, 계정/상태 필터)
+- `/admin/rules` — 트리거 규칙 생성/활성화 토글/삭제
+- `/admin/templates` — DM 템플릿 생성/삭제
+- `/admin/accounts` — 인스타그램 계정 등록/삭제
+
 ## 백오피스 API
 
 | Method | Path | 설명 |
@@ -75,6 +85,6 @@ curl -s http://localhost:3000/api/events | jq .
 
 ## 아직 안 한 것
 
-- 프론트엔드 관리 화면 (현재는 REST API만 제공)
+- 백오피스 화면에 로그인/권한 없음 — 내부망 등 신뢰된 환경에서만 노출할 것
 - 쿠팡파트너스 링크 생성 자체는 포함하지 않음 — DM 템플릿에 미리 만든 링크를 넣어 사용
 - 실제 Meta 웹훅 구독/토큰 발급은 사용자가 Meta for Developers에서 직접 진행 필요
