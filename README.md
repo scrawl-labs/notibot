@@ -37,6 +37,28 @@ npm run dev             # http://localhost:3000
 - `npm run build` / `npm start` — 빌드 후 실행
 - `npm test` — 테스트 DB(prisma/test.db)에 스키마를 push한 뒤 vitest 실행
 - `npm run typecheck` — 타입 검사만 수행
+- `npm run demo:seed` — 데모 계정/템플릿/트리거 규칙 생성 (`jq` 필요)
+- `npm run simulate -- --ig-user <id> --media <id> --text "..."` — 실제 Meta 웹훅과 동일한 형식/서명으로 가짜 댓글 이벤트를 로컬 서버에 전송 (Meta 앱 없이 파이프라인 테스트용)
+
+## 로컬에서 파이프라인 테스트해보기
+
+Meta 앱/웹훅 없이도 전체 흐름을 확인할 수 있습니다.
+
+```bash
+npm run dev                     # 1) 서버 실행 (다른 터미널)
+npm run demo:seed               # 2) 데모 계정 + 트리거 규칙("오이") 생성
+
+# 3) 키워드가 매칭되는 댓글 시뮬레이션 → DM 시도 (dummy 토큰이라 발송 자체는 실패하지만 매칭/로그는 확인 가능)
+npm run simulate -- --ig-user ig-acc-demo --media media-demo --text "오이 주세요"
+
+# 4) 매칭 안 되는 댓글 시뮬레이션 → NO_MATCH로 로그
+npm run simulate -- --ig-user ig-acc-demo --media media-demo --text "수박 주세요"
+
+# 5) 로그 확인
+curl -s http://localhost:3000/api/events | jq .
+```
+
+실제 계정으로 DM까지 성공시키려면 `/api/accounts` 생성 시 진짜 `pageAccessToken`을 넣어야 합니다.
 
 ## 백오피스 API
 

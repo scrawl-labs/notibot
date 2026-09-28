@@ -12,7 +12,9 @@
     "pretest": "DATABASE_URL=file:./test.db prisma db push --skip-generate",
     "test": "vitest run",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "demo:seed": "bash scripts/seed-demo.sh",
+    "simulate": "node --env-file=.env scripts/simulate-comment.mjs"
   },
   "repository": {
     "type": "git",
