@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum MatchType {
+  EXACT
+  CONTAINS
+  REGEX
+}
+
+enum DmStatus {
+  SENT
+  FAILED
+  SKIPPED
+  NO_MATCH
+}
+
+model InstagramAccount {
+  id                String   @id @default(cuid())
+  igUserId          String   @unique
+  username          String?
+  pageAccessToken   String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  triggerRules  TriggerRule[]
+  commentEvents CommentEvent[]
+}
+
+model DmTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  triggerRules TriggerRule[]
+}
+
+model TriggerRule {
+  id           String    @id @default(cuid())
+  accountId    String
+  mediaId      String?
+  keyword      String
+  matchType    MatchType @default(CONTAINS)
+  isActive     Boolean   @default(true)
+  priority     Int       @default(0)
+  dmTemplateId String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  account       InstagramAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  dmTemplate    DmTemplate       @relation(fields: [dmTemplateId], references: [id])
+  commentEvents CommentEvent[]
+
+  @@index([accountId, mediaId])
+}
+
+model CommentEvent {
+  id            String    @id @default(cuid())
+  accountId     String
+  mediaId       String
+  commentId     String    @unique
+  fromUsername  String?
+  fromUserId    String?
+  text          String
+  matchedRuleId String?
+  dmStatus      DmStatus
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+
+  account     InstagramAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  matchedRule TriggerRule?     @relation(fields: [matchedRuleId], references: [id])
+
+  @@index([accountId, mediaId])
+}
