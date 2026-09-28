@@ -10,7 +10,7 @@ triggerRulesRouter.get("/", async (req, res) => {
       accountId: typeof accountId === "string" ? accountId : undefined,
       mediaId: typeof mediaId === "string" ? mediaId : undefined,
     },
-    include: { dmTemplate: true },
+    include: { account: true, dmTemplate: true },
     orderBy: { createdAt: "desc" },
   });
   res.json(rules);
@@ -33,6 +33,7 @@ triggerRulesRouter.post("/", async (req, res) => {
         dmTemplateId,
         isActive: isActive ?? true,
       },
+      include: { account: true, dmTemplate: true },
     });
     res.status(201).json(rule);
   } catch (err) {
@@ -41,7 +42,10 @@ triggerRulesRouter.post("/", async (req, res) => {
 });
 
 triggerRulesRouter.get("/:id", async (req, res) => {
-  const rule = await prisma.triggerRule.findUnique({ where: { id: req.params.id }, include: { dmTemplate: true } });
+  const rule = await prisma.triggerRule.findUnique({
+    where: { id: req.params.id },
+    include: { account: true, dmTemplate: true },
+  });
   if (!rule) {
     res.sendStatus(404);
     return;
@@ -55,6 +59,7 @@ triggerRulesRouter.patch("/:id", async (req, res) => {
     const rule = await prisma.triggerRule.update({
       where: { id: req.params.id },
       data: { mediaId, keyword, matchType, priority, dmTemplateId, isActive },
+      include: { account: true, dmTemplate: true },
     });
     res.json(rule);
   } catch {

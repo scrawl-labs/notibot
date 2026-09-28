@@ -5,9 +5,9 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "npm run build:css && tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json && npm run build:css",
-    "build:css": "tailwindcss -i ./assets/input.css -o ./public/admin.css --minify",
+    "dev": "npm run build:admin-ui && tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json && npm run build:admin-ui",
+    "build:admin-ui": "npm install --prefix admin-ui && npm run build --prefix admin-ui",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "pretest": "DATABASE_URL=file:./test.db prisma db push --skip-generate",
@@ -30,19 +30,14 @@
   "homepage": "https://github.com/scrawl-labs/notibot#readme",
   "dependencies": {
     "@prisma/client": "^6.19.3",
-    "ejs": "^6.0.1",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.3",
-    "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.3",
     "@types/supertest": "^7.2.1",
-    "daisyui": "^5.7.46",
     "prisma": "^6.19.3",
     "supertest": "^7.3.0",
-    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^5.0.2"

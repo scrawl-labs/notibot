@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
 export const accountsRouter = Router();
@@ -18,10 +19,18 @@ accountsRouter.post("/", async (req, res) => {
     return;
   }
 
-  const account = await prisma.instagramAccount.create({
-    data: { igUserId, username, pageAccessToken },
-  });
-  res.status(201).json({ ...account, pageAccessToken: undefined });
+  try {
+    const account = await prisma.instagramAccount.create({
+      data: { igUserId, username, pageAccessToken },
+    });
+    res.status(201).json({ ...account, pageAccessToken: undefined });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      res.status(400).json({ error: "이미 등록된 계정입니다 (중복)." });
+      return;
+    }
+    throw err;
+  }
 });
 
 accountsRouter.get("/:id", async (req, res) => {

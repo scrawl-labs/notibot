@@ -62,16 +62,19 @@ curl -s http://localhost:3000/api/events | jq .
 
 ## 백오피스 화면
 
-`npm run dev`(또는 `npm start`) 실행 후 브라우저에서 **http://localhost:3000/admin** 접속. 별도 프론트엔드
-서버 없이 같은 Express 프로세스가 EJS로 서버사이드 렌더링합니다. 스타일은
-[Tailwind CSS](https://tailwindcss.com) + [daisyUI](https://daisyui.com)(`corporate` 테마)를
-빌드 타임에 `public/admin.css`로 컴파일해서 정적으로 서빙합니다 (런타임 CDN 의존 없음 — `npm run dev`/`build`가
-자동으로 `build:css`를 실행). 클래스를 바꾼 뒤 CSS가 반영되지 않으면 `npm run build:css`를 다시 실행하세요.
+`admin-ui/`에 있는 React SPA([Astryx](https://github.com/facebook/astryx) 디자인시스템,
+`neutralTheme`)가 빌드되어 `admin-ui/dist`로 나오고, Express가 이를 `/admin` 경로에 정적으로
+서빙합니다 (별도 서버 없음 — `npm run dev`/`build`가 `admin-ui`의 `npm install`+`vite build`까지
+자동으로 실행). SPA는 기존 `/api/*` REST API를 그대로 호출합니다.
 
-- `/admin/events` — 이벤트 로그 (성공/실패/매칭없음 기록, 계정/상태 필터)
-- `/admin/rules` — 트리거 규칙 생성/활성화 토글/삭제
-- `/admin/templates` — DM 템플릿 생성/삭제
-- `/admin/accounts` — 인스타그램 계정 등록/삭제
+- 이벤트 로그 — 성공/실패/매칭없음 기록, 계정/상태 필터
+- 트리거 규칙 — 생성/활성화 토글/삭제
+- DM 템플릿 — 생성/삭제
+- 계정 — 등록/삭제
+
+`admin-ui` 코드를 수정한 뒤 반영이 안 되면 `npm run build:admin-ui`를 다시 실행하세요.
+`admin-ui` 자체에서 `npm run dev`(Vite dev server, `/api`는 3000번 포트로 프록시)를 띄우면
+핫 리로드로 UI만 빠르게 개발할 수 있습니다.
 
 ## 백오피스 API
 

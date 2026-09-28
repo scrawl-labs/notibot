@@ -5,18 +5,15 @@ import { accountsRouter } from "./routes/accounts.js";
 import { dmTemplatesRouter } from "./routes/dmTemplates.js";
 import { triggerRulesRouter } from "./routes/triggerRules.js";
 import { eventsRouter } from "./routes/events.js";
-import { adminRouter } from "./routes/admin.js";
 
 interface RequestWithRawBody extends Request {
   rawBody?: Buffer;
 }
 
+const adminUiDist = path.join(process.cwd(), "admin-ui/dist");
+
 export function createApp() {
   const app = express();
-
-  app.set("view engine", "ejs");
-  app.set("views", path.join(process.cwd(), "views"));
-  app.use(express.static(path.join(process.cwd(), "public")));
 
   app.use(
     express.json({
@@ -34,7 +31,10 @@ export function createApp() {
   app.use("/api/dm-templates", dmTemplatesRouter);
   app.use("/api/trigger-rules", triggerRulesRouter);
   app.use("/api/events", eventsRouter);
-  app.use("/admin", adminRouter);
+
+  // Astryx-based admin SPA (built by admin-ui/), served statically under /admin.
+  // express.static serves index.html for /admin/ and redirects /admin -> /admin/.
+  app.use("/admin", express.static(adminUiDist));
 
   return app;
 }

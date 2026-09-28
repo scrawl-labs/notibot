@@ -11,7 +11,7 @@ eventsRouter.get("/", async (req, res) => {
       mediaId: typeof mediaId === "string" ? mediaId : undefined,
       dmStatus: typeof dmStatus === "string" ? (dmStatus as never) : undefined,
     },
-    include: { matchedRule: true },
+    include: { account: true, matchedRule: true },
     orderBy: { createdAt: "desc" },
     take: 200,
   });
@@ -19,7 +19,10 @@ eventsRouter.get("/", async (req, res) => {
 });
 
 eventsRouter.get("/:id", async (req, res) => {
-  const event = await prisma.commentEvent.findUnique({ where: { id: req.params.id }, include: { matchedRule: true } });
+  const event = await prisma.commentEvent.findUnique({
+    where: { id: req.params.id },
+    include: { account: true, matchedRule: true },
+  });
   if (!event) {
     res.sendStatus(404);
     return;
