@@ -31,58 +31,56 @@ export function AccountsView() {
       setPageAccessToken("");
       await refresh();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "계정 생성에 실패했습니다.");
+      setError(e instanceof ApiError ? e.message : "Failed to create account.");
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("삭제할까요? 연결된 트리거 규칙도 함께 삭제됩니다.")) return;
+    if (!confirm("Delete this account? Connected trigger rules will also be deleted.")) return;
     await api.accounts.remove(id);
     await refresh();
   }
 
   return (
     <>
-      {error && <Banner status="error" title={error} isDismissable onDismiss={() => setError(null)} style={{ marginBottom: 16 }} />}
+      {error && <Banner status="error" title={error} isDismissable onDismiss={() => setError(null)} style={{ marginBottom: 20 }} />}
 
-      <Card style={{ marginBottom: 16 }}>
-        <Grid columns={3} gap={3} style={{ marginBottom: 12 }}>
+      <Card padding={6} style={{ marginBottom: 20 }}>
+        <Grid columns={{ minWidth: 220, max: 3, repeat: "fit" }} gap={4} style={{ marginBottom: 16 }}>
           <TextInput label="Instagram User ID" placeholder="179xxxxxxxxxxxx" value={igUserId} onChange={setIgUserId} isRequired size="sm" />
-          <TextInput label="이름 (표시용)" placeholder="my_shop" value={username} onChange={setUsername} size="sm" />
-          <TextInput label="Page Access Token" placeholder="Meta에서 발급받은 토큰" value={pageAccessToken} onChange={setPageAccessToken} isRequired size="sm" />
+          <TextInput label="Display Name" placeholder="my_shop" value={username} onChange={setUsername} size="sm" />
+          <TextInput label="Page Access Token" placeholder="Token issued by Meta" value={pageAccessToken} onChange={setPageAccessToken} isRequired size="sm" />
         </Grid>
-        <Button label="계정 추가" variant="primary" size="sm" clickAction={handleCreate} isDisabled={!igUserId || !pageAccessToken} />
+        <Button label="Add Account" variant="primary" size="sm" clickAction={handleCreate} isDisabled={!igUserId || !pageAccessToken} />
       </Card>
 
-      <Card>
+      <Card padding={6}>
         {accounts.length === 0 ? (
-          <EmptyState title="등록된 계정이 없습니다" />
+          <EmptyState title="No accounts registered yet" />
         ) : (
-          <div className="notibot-table-wrap">
-            <Table<Account>
-              data={accounts}
-              idKey="id"
-              density="compact"
-              hasHover
-              isStriped
-              columns={[
-                { key: "igUserId", header: "IG User ID", width: proportional(1), renderCell: (a) => <Text className="mono" size="sm">{a.igUserId}</Text> },
-                { key: "username", header: "이름", width: proportional(1), renderCell: (a) => a.username ?? "-" },
-                {
-                  key: "createdAt",
-                  header: "등록일",
-                  width: pixel(110),
-                  renderCell: (a) => <Text className="mono" size="sm" color="secondary">{a.createdAt.slice(0, 10)}</Text>,
-                },
-                {
-                  key: "actions",
-                  header: "",
-                  width: pixel(70),
-                  renderCell: (a) => <Button label="삭제" variant="ghost" size="sm" onClick={() => handleDelete(a.id)} />,
-                },
-              ]}
-            />
-          </div>
+          <Table<Account>
+            data={accounts}
+            idKey="id"
+            density="compact"
+            hasHover
+            isStriped
+            columns={[
+              { key: "igUserId", header: "IG User ID", width: proportional(1), renderCell: (a) => <Text className="mono" size="sm">{a.igUserId}</Text> },
+              { key: "username", header: "Name", width: proportional(1), renderCell: (a) => a.username ?? "-" },
+              {
+                key: "createdAt",
+                header: "Registered",
+                width: pixel(110),
+                renderCell: (a) => <Text className="mono" size="sm" color="secondary">{a.createdAt.slice(0, 10)}</Text>,
+              },
+              {
+                key: "actions",
+                header: "",
+                width: pixel(80),
+                renderCell: (a) => <Button label="Delete" variant="ghost" size="sm" onClick={() => handleDelete(a.id)} />,
+              },
+            ]}
+          />
         )}
       </Card>
     </>

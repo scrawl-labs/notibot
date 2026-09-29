@@ -57,7 +57,7 @@ export function RulesView() {
       setPriority("0");
       await refresh();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "규칙 생성에 실패했습니다.");
+      setError(e instanceof ApiError ? e.message : "Failed to create rule.");
     }
   }
 
@@ -67,7 +67,7 @@ export function RulesView() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("삭제할까요?")) return;
+    if (!confirm("Delete this rule?")) return;
     await api.rules.remove(id);
     await refresh();
   }
@@ -77,88 +77,86 @@ export function RulesView() {
   return (
     <>
       {error && (
-        <Banner status="error" title={error} isDismissable onDismiss={() => setError(null)} style={{ marginBottom: 16 }} />
+        <Banner status="error" title={error} isDismissable onDismiss={() => setError(null)} style={{ marginBottom: 20 }} />
       )}
 
-      <Card style={{ marginBottom: 16 }}>
+      <Card padding={6} style={{ marginBottom: 20 }}>
         {!canCreate ? (
-          <Text color="secondary">규칙을 만들려면 먼저 계정과 DM 템플릿을 하나 이상 등록하세요.</Text>
+          <Text color="secondary">To create a rule, first register at least one account and DM template.</Text>
         ) : (
           <>
-            <Grid columns={6} gap={3} style={{ marginBottom: 12 }}>
+            <Grid columns={{ minWidth: 150, max: 6, repeat: "fit" }} gap={4} style={{ marginBottom: 16 }}>
               <Selector
-                label="계정"
+                label="Account"
                 options={accounts.map((a) => ({ value: a.id, label: a.username ?? a.igUserId }))}
                 value={accountId}
                 onChange={(v) => setAccountId(v ?? "")}
                 size="sm"
               />
-              <TextInput label="미디어 ID (선택)" placeholder="media-123" value={mediaId} onChange={setMediaId} size="sm" />
-              <TextInput label="키워드" placeholder="오이" value={keyword} onChange={setKeyword} isRequired size="sm" />
+              <TextInput label="Media ID (optional)" placeholder="media-123" value={mediaId} onChange={setMediaId} size="sm" />
+              <TextInput label="Keyword" placeholder="cucumber" value={keyword} onChange={setKeyword} isRequired size="sm" />
               <Selector
-                label="매칭 방식"
+                label="Match Type"
                 options={MATCH_TYPE_OPTIONS}
                 value={matchType}
                 onChange={(v) => setMatchType((v ?? "CONTAINS") as MatchType)}
                 size="sm"
               />
               <Selector
-                label="DM 템플릿"
+                label="DM Template"
                 options={templates.map((t) => ({ value: t.id, label: t.name }))}
                 value={dmTemplateId}
                 onChange={(v) => setDmTemplateId(v ?? "")}
                 size="sm"
               />
-              <TextInput label="우선순위" value={priority} onChange={setPriority} size="sm" />
+              <TextInput label="Priority" value={priority} onChange={setPriority} size="sm" />
             </Grid>
-            <Button label="규칙 추가" variant="primary" size="sm" clickAction={handleCreate} isDisabled={!keyword} />
+            <Button label="Add Rule" variant="primary" size="sm" clickAction={handleCreate} isDisabled={!keyword} />
           </>
         )}
       </Card>
 
-      <Card>
+      <Card padding={6}>
         {rules.length === 0 ? (
-          <EmptyState title="등록된 트리거 규칙이 없습니다" />
+          <EmptyState title="No trigger rules registered yet" />
         ) : (
-          <div className="notibot-table-wrap">
-            <Table<TriggerRule>
-              data={rules}
-              idKey="id"
-              density="compact"
-              hasHover
-              isStriped
-              columns={[
-                { key: "account", header: "계정", width: proportional(1), renderCell: (r) => r.account.username ?? r.account.igUserId },
-                {
-                  key: "mediaId",
-                  header: "범위",
-                  width: proportional(1),
-                  renderCell: (r) => <Text className="mono" size="sm" color="secondary">{r.mediaId ?? "전체"}</Text>,
-                },
-                { key: "keyword", header: "키워드", width: proportional(1), renderCell: (r) => r.keyword },
-                { key: "matchType", header: "방식", width: pixel(100), renderCell: (r) => <Text size="sm" color="secondary">{r.matchType}</Text> },
-                { key: "dmTemplate", header: "템플릿", width: proportional(1), renderCell: (r) => r.dmTemplate.name },
-                { key: "priority", header: "우선순위", width: pixel(80), renderCell: (r) => <Text size="sm" color="secondary">{r.priority}</Text> },
-                {
-                  key: "isActive",
-                  header: "상태",
-                  width: pixel(90),
-                  renderCell: (r) => <Badge variant={r.isActive ? "success" : "neutral"} label={r.isActive ? "활성" : "비활성"} />,
-                },
-                {
-                  key: "actions",
-                  header: "",
-                  width: pixel(160),
-                  renderCell: (r) => (
-                    <HStack gap={1}>
-                      <Button label={r.isActive ? "비활성화" : "활성화"} variant="ghost" size="sm" clickAction={() => handleToggle(r)} />
-                      <Button label="삭제" variant="ghost" size="sm" onClick={() => handleDelete(r.id)} />
-                    </HStack>
-                  ),
-                },
-              ]}
-            />
-          </div>
+          <Table<TriggerRule>
+            data={rules}
+            idKey="id"
+            density="compact"
+            hasHover
+            isStriped
+            columns={[
+              { key: "account", header: "Account", width: proportional(1), renderCell: (r) => r.account.username ?? r.account.igUserId },
+              {
+                key: "mediaId",
+                header: "Scope",
+                width: proportional(1),
+                renderCell: (r) => <Text className="mono" size="sm" color="secondary">{r.mediaId ?? "All"}</Text>,
+              },
+              { key: "keyword", header: "Keyword", width: proportional(1), renderCell: (r) => r.keyword },
+              { key: "matchType", header: "Type", width: pixel(100), renderCell: (r) => <Text size="sm" color="secondary">{r.matchType}</Text> },
+              { key: "dmTemplate", header: "Template", width: proportional(1), renderCell: (r) => r.dmTemplate.name },
+              { key: "priority", header: "Priority", width: pixel(80), renderCell: (r) => <Text size="sm" color="secondary">{r.priority}</Text> },
+              {
+                key: "isActive",
+                header: "Status",
+                width: pixel(90),
+                renderCell: (r) => <Badge variant={r.isActive ? "success" : "neutral"} label={r.isActive ? "Active" : "Inactive"} />,
+              },
+              {
+                key: "actions",
+                header: "",
+                width: pixel(160),
+                renderCell: (r) => (
+                  <HStack gap={1}>
+                    <Button label={r.isActive ? "Deactivate" : "Activate"} variant="ghost" size="sm" clickAction={() => handleToggle(r)} />
+                    <Button label="Delete" variant="ghost" size="sm" onClick={() => handleDelete(r.id)} />
+                  </HStack>
+                ),
+              },
+            ]}
+          />
         )}
       </Card>
     </>

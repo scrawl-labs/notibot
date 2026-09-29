@@ -26,7 +26,7 @@ accountsRouter.post("/", async (req, res) => {
     res.status(201).json({ ...account, pageAccessToken: undefined });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      res.status(400).json({ error: "이미 등록된 계정입니다 (중복)." });
+      res.status(400).json({ error: "This account is already registered (duplicate)." });
       return;
     }
     throw err;

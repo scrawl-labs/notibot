@@ -1,6 +1,21 @@
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
 @import "@astryxdesign/theme-neutral/theme.css";
+@import "pretendard/dist/web/variable/pretendardvariable.css";
+
+/* Astryx's neutral theme defaults to Figtree (Latin-only), which falls back
+   to a generic system sans-serif for Korean glyphs. The theme sets its font
+   tokens inside `@scope([data-astryx-theme=neutral]) { :scope { ... } }`,
+   which wins over a plain `:root` override regardless of source order (scope
+   proximity is a cascade tie-breaker above specificity/order). Match that
+   same scope so ours wins on source order instead. */
+@scope ([data-astryx-theme="neutral"]) to ([data-astryx-theme]) {
+  :scope {
+    --font-family-body: "Pretendard Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --font-family-heading: var(--font-family-body);
+  }
+}
 
 html,
 body,
@@ -16,8 +31,10 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-.notibot-table-wrap {
-  width: 100%;
-  min-width: 0;
-  overflow-x: auto;
+/* Pretendard Variable's line metrics run taller than Figtree's at the same
+   line-height, so Astryx's compact table header cells (fixed line-height +
+   overflow:hidden) clip the tops of capital letters. Give header cells a
+   little more room. */
+.astryx-table-header-cell {
+  line-height: 2.2;
 }

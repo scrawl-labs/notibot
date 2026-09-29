@@ -29,75 +29,73 @@ export function TemplatesView() {
       setBody("");
       await refresh();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "템플릿 생성에 실패했습니다.");
+      setError(e instanceof ApiError ? e.message : "Failed to create template.");
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("삭제할까요?")) return;
+    if (!confirm("Delete this template?")) return;
     await api.templates.remove(id);
     await refresh();
   }
 
   return (
     <>
-      {error && <Banner status="error" title={error} isDismissable onDismiss={() => setError(null)} style={{ marginBottom: 16 }} />}
+      {error && <Banner status="error" title={error} isDismissable onDismiss={() => setError(null)} style={{ marginBottom: 20 }} />}
 
-      <Card style={{ marginBottom: 16 }}>
-        <div style={{ maxWidth: 320, marginBottom: 12 }}>
-          <TextInput label="이름" placeholder="cucumber" value={name} onChange={setName} isRequired size="sm" />
+      <Card padding={6} style={{ marginBottom: 20 }}>
+        <div style={{ maxWidth: 320, marginBottom: 16 }}>
+          <TextInput label="Name" placeholder="cucumber" value={name} onChange={setName} isRequired size="sm" />
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 16 }}>
           <TextArea
-            label="본문 ({{username}} 사용 가능)"
-            placeholder="안녕하세요 {{username}}님! 최저가 링크는 ... 입니다"
+            label="Body ({{username}} available)"
+            placeholder="Hi {{username}}! Here's the lowest price link: ..."
             value={body}
             onChange={setBody}
             rows={3}
             isRequired
           />
         </div>
-        <Button label="템플릿 추가" variant="primary" size="sm" clickAction={handleCreate} isDisabled={!name || !body} />
+        <Button label="Add Template" variant="primary" size="sm" clickAction={handleCreate} isDisabled={!name || !body} />
       </Card>
 
-      <Card>
+      <Card padding={6}>
         {templates.length === 0 ? (
-          <EmptyState title="등록된 템플릿이 없습니다" />
+          <EmptyState title="No templates registered yet" />
         ) : (
-          <div className="notibot-table-wrap">
-            <Table<DmTemplate>
-              data={templates}
-              idKey="id"
-              density="compact"
-              hasHover
-              isStriped
-              columns={[
-                { key: "name", header: "이름", width: proportional(1) },
-                {
-                  key: "body",
-                  header: "본문",
-                  width: proportional(3),
-                  renderCell: (t) => (
-                    <Text className="mono" size="sm" maxLines={1}>
-                      {t.body}
-                    </Text>
-                  ),
-                },
-                {
-                  key: "createdAt",
-                  header: "생성일",
-                  width: pixel(110),
-                  renderCell: (t) => <Text className="mono" size="sm" color="secondary">{t.createdAt.slice(0, 10)}</Text>,
-                },
-                {
-                  key: "actions",
-                  header: "",
-                  width: pixel(70),
-                  renderCell: (t) => <Button label="삭제" variant="ghost" size="sm" onClick={() => handleDelete(t.id)} />,
-                },
-              ]}
-            />
-          </div>
+          <Table<DmTemplate>
+            data={templates}
+            idKey="id"
+            density="compact"
+            hasHover
+            isStriped
+            columns={[
+              { key: "name", header: "Name", width: proportional(1) },
+              {
+                key: "body",
+                header: "Body",
+                width: proportional(3),
+                renderCell: (t) => (
+                  <Text className="mono" size="sm" maxLines={1}>
+                    {t.body}
+                  </Text>
+                ),
+              },
+              {
+                key: "createdAt",
+                header: "Created",
+                width: pixel(110),
+                renderCell: (t) => <Text className="mono" size="sm" color="secondary">{t.createdAt.slice(0, 10)}</Text>,
+              },
+              {
+                key: "actions",
+                header: "",
+                width: pixel(80),
+                renderCell: (t) => <Button label="Delete" variant="ghost" size="sm" onClick={() => handleDelete(t.id)} />,
+              },
+            ]}
+          />
         )}
       </Card>
     </>
