@@ -1,8 +1,26 @@
-import type { PrismaClient } from "@prisma/client";
+import type { DmTemplate, PrismaClient } from "@prisma/client";
 import { findMatchingRule } from "./triggerMatcher.js";
 import { renderTemplate } from "./templateRenderer.js";
-import { sendPrivateReply, InstagramApiError } from "./instagramClient.js";
+import { sendPrivateReply, InstagramApiError, type OutboundMessage } from "./instagramClient.js";
 import type { IncomingComment } from "../webhook/payload.js";
+
+function buildOutboundMessage(template: DmTemplate, vars: Record<string, string | undefined>): OutboundMessage {
+  switch (template.messageType) {
+    case "IMAGE":
+      return { type: "IMAGE", imageUrl: template.imageUrl! };
+    case "GENERIC":
+      return {
+        type: "GENERIC",
+        title: renderTemplate(template.body!, vars),
+        imageUrl: template.imageUrl!,
+        buttonUrl: template.buttonUrl!,
+        buttonLabel: template.buttonLabel!,
+      };
+    case "TEXT":
+    default:
+      return { type: "TEXT", text: renderTemplate(template.body!, vars) };
+  }
+}
 
 export type SendDmFn = typeof sendPrivateReply;
 
@@ -55,9 +73,7 @@ export async function processComment(
     return { status: "NO_MATCH" };
   }
 
-  const message = renderTemplate(matchedRule.dmTemplate.body, {
-    username: comment.fromUsername,
-  });
+  const message = buildOutboundMessage(matchedRule.dmTemplate, { username: comment.fromUsername });
 
   try {
     await sendDm({

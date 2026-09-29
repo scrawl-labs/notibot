@@ -20,6 +20,12 @@ enum DmStatus {
   NO_MATCH
 }
 
+enum DmMessageType {
+  TEXT
+  IMAGE
+  GENERIC
+}
+
 model InstagramAccount {
   id                String   @id @default(cuid())
   igUserId          String   @unique
@@ -33,11 +39,15 @@ model InstagramAccount {
 }
 
 model DmTemplate {
-  id        String   @id @default(cuid())
-  name      String
-  body      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  messageType DmMessageType @default(TEXT)
+  body        String?
+  imageUrl    String?
+  buttonUrl   String?
+  buttonLabel String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   triggerRules TriggerRule[]
 }

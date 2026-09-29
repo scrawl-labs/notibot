@@ -41,13 +41,76 @@ describe("processComment", () => {
     expect(result.status).toBe("SENT");
     expect(sendDm).toHaveBeenCalledWith({
       commentId: "comment-1",
-      message: "안녕하세요 alice님! 링크는 https://link.coupang.com/abc 입니다",
+      message: { type: "TEXT", text: "안녕하세요 alice님! 링크는 https://link.coupang.com/abc 입니다" },
       accessToken: "token-123",
     });
 
     const event = await prisma.commentEvent.findUnique({ where: { commentId: "comment-1" } });
     expect(event?.dmStatus).toBe("SENT");
     expect(event?.matchedRuleId).not.toBeNull();
+  });
+
+  it("sends an IMAGE message built from the template's imageUrl", async () => {
+    const account = await seedAccount();
+    const template = await prisma.dmTemplate.create({
+      data: { name: "img", messageType: "IMAGE", imageUrl: "https://example.com/apple.jpg" },
+    });
+    await prisma.triggerRule.create({
+      data: { accountId: account.id, mediaId: "media-1", keyword: "오이", dmTemplateId: template.id },
+    });
+
+    const sendDm = vi.fn().mockResolvedValue({ messageId: "msg-1" });
+
+    const result = await processComment(
+      prisma,
+      { igUserId: "ig-account-1", mediaId: "media-1", commentId: "comment-img", text: "오이 주세요" },
+      { sendDm },
+    );
+
+    expect(result.status).toBe("SENT");
+    expect(sendDm).toHaveBeenCalledWith({
+      commentId: "comment-img",
+      message: { type: "IMAGE", imageUrl: "https://example.com/apple.jpg" },
+      accessToken: "token-123",
+    });
+  });
+
+  it("sends a GENERIC message with title, image and button built from the template", async () => {
+    const account = await seedAccount();
+    const template = await prisma.dmTemplate.create({
+      data: {
+        name: "generic",
+        messageType: "GENERIC",
+        body: "Hi {{username}}, check this out",
+        imageUrl: "https://example.com/apple.jpg",
+        buttonUrl: "https://link.coupang.com/a/xyz",
+        buttonLabel: "Buy Now",
+      },
+    });
+    await prisma.triggerRule.create({
+      data: { accountId: account.id, mediaId: "media-1", keyword: "오이", dmTemplateId: template.id },
+    });
+
+    const sendDm = vi.fn().mockResolvedValue({ messageId: "msg-1" });
+
+    const result = await processComment(
+      prisma,
+      { igUserId: "ig-account-1", mediaId: "media-1", commentId: "comment-generic", text: "오이 주세요", fromUsername: "alice" },
+      { sendDm },
+    );
+
+    expect(result.status).toBe("SENT");
+    expect(sendDm).toHaveBeenCalledWith({
+      commentId: "comment-generic",
+      message: {
+        type: "GENERIC",
+        title: "Hi alice, check this out",
+        imageUrl: "https://example.com/apple.jpg",
+        buttonUrl: "https://link.coupang.com/a/xyz",
+        buttonLabel: "Buy Now",
+      },
+      accessToken: "token-123",
+    });
   });
 
   it("logs NO_MATCH and skips sending when no rule matches", async () => {

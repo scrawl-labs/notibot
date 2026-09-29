@@ -7,11 +7,17 @@ export interface Account {
   updatedAt: string;
 }
 
+export type DmMessageType = "TEXT" | "IMAGE" | "GENERIC";
+
 export interface DmTemplate {
   [key: string]: unknown;
   id: string;
   name: string;
-  body: string;
+  messageType: DmMessageType;
+  body: string | null;
+  imageUrl: string | null;
+  buttonUrl: string | null;
+  buttonLabel: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,7 +67,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => undefined);
-    throw new ApiError(body?.error ?? `요청 실패 (${res.status})`);
+    throw new ApiError(body?.error ?? `Request failed (${res.status})`);
   }
   if (res.status === 204) return undefined as T;
   return res.json();
@@ -76,8 +82,14 @@ export const api = {
   },
   templates: {
     list: () => request<DmTemplate[]>("/dm-templates"),
-    create: (data: { name: string; body: string }) =>
-      request<DmTemplate>("/dm-templates", { method: "POST", body: JSON.stringify(data) }),
+    create: (data: {
+      name: string;
+      messageType: DmMessageType;
+      body?: string;
+      imageUrl?: string;
+      buttonUrl?: string;
+      buttonLabel?: string;
+    }) => request<DmTemplate>("/dm-templates", { method: "POST", body: JSON.stringify(data) }),
     remove: (id: string) => request<void>(`/dm-templates/${id}`, { method: "DELETE" }),
   },
   rules: {

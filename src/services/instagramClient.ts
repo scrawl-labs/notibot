@@ -12,6 +12,51 @@ export class InstagramApiError extends Error {
 }
 
 /**
+ * A DM to send via `sendPrivateReply`. TEXT maps to the private_replies
+ * plain-text `message` field. IMAGE and GENERIC use the Messenger Send API's
+ * `attachment` shapes (image attachment / generic template with a web_url
+ * button) documented for Meta's `/messages` endpoint. Whether private_replies
+ * specifically accepts these attachment payloads (vs. only string `message`)
+ * is unverified against primary Meta docs in this environment - confirm
+ * against a real Instagram Business account before relying on IMAGE/GENERIC
+ * in production.
+ */
+export type OutboundMessage =
+  | { type: "TEXT"; text: string }
+  | { type: "IMAGE"; imageUrl: string }
+  | { type: "GENERIC"; title: string; imageUrl: string; buttonUrl: string; buttonLabel: string };
+
+export function buildMessagePayload(message: OutboundMessage): unknown {
+  switch (message.type) {
+    case "TEXT":
+      return message.text;
+    case "IMAGE":
+      return {
+        attachment: {
+          type: "image",
+          payload: { url: message.imageUrl },
+        },
+      };
+    case "GENERIC":
+      return {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: [
+              {
+                title: message.title,
+                image_url: message.imageUrl,
+                buttons: [{ type: "web_url", url: message.buttonUrl, title: message.buttonLabel }],
+              },
+            ],
+          },
+        },
+      };
+  }
+}
+
+/**
  * Sends a DM to the author of an Instagram comment via the "private reply"
  * endpoint. This is the mechanism Meta provides for replying privately to a
  * comment without full Messaging API access; it must be called within 7 days
@@ -20,7 +65,7 @@ export class InstagramApiError extends Error {
  */
 export async function sendPrivateReply(params: {
   commentId: string;
-  message: string;
+  message: OutboundMessage;
   accessToken: string;
   fetchImpl?: typeof fetch;
 }): Promise<{ messageId: string }> {
@@ -30,7 +75,7 @@ export async function sendPrivateReply(params: {
   const res = await fetchImpl(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, access_token: accessToken }),
+    body: JSON.stringify({ message: buildMessagePayload(message), access_token: accessToken }),
   });
 
   const body = await res.json().catch(() => undefined);
